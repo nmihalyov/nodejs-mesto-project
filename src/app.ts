@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
 
@@ -9,6 +9,15 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Временное решение авторизации
+app.use((req: Request, _: Response, next: NextFunction) => {
+  // @ts-ignore
+  req.user = {
+    _id: '65b6958baa2624dfaba2955d',
+  };
+
+  next();
+});
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
