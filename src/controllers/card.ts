@@ -1,6 +1,8 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { ObjectId, isValidObjectId } from 'mongoose';
 
+import ClientError from '../errors/client';
+import NotFoundError from '../errors/notFound';
 import Card, { ICard } from '../models/card';
 
 type TCreateCard = Pick<ICard, 'name' | 'link'>;
@@ -9,60 +11,68 @@ interface ICardId {
   cardId: ObjectId;
 }
 
-export const getCards = async (_: Request, res: Response) => {
+const NOT_FOUND_TEXT = 'Запрашиваемая карточка не найдена';
+const INCORRECT_ID_TEXT = 'Некорректный ID карточки';
+
+export const getCards = async (_: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({});
 
     res.send({ status: 'success', cards });
   } catch (error) {
-    res.status(500).send({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
-export const createCard = async (req: Request<any, any, TCreateCard>, res: Response) => {
+export const createCard = async (
+  req: Request<any, any, TCreateCard>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     // @ts-ignore
     const { _id } = req.user;
     const { name, link } = req.body;
 
-    const card = await Card.create({ name, link, owner: _id });
-
     if (!name || !link) {
-      res.status(400).send({ status: 'error', message: 'Некорректные данные' });
-      return;
+      throw new ClientError('Некорректные данные');
     }
+
+    const card = await Card.create({ name, link, owner: _id });
 
     res.status(201).send({ status: 'success', card });
   } catch (error) {
-    res.status(500).send({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
-export const deleteCard = async (req: Request<ICardId>, res: Response) => {
+export const deleteCard = async (req: Request<ICardId>, res: Response, next: NextFunction) => {
   try {
     const { cardId } = req.params;
 
-    const result = await Card.deleteOne({ _id: cardId });
-
     if (!isValidObjectId(cardId)) {
-      res.status(400).send({ status: 'error', message: 'Некорректный ID карточки' });
-      return;
+      throw new ClientError(INCORRECT_ID_TEXT);
     }
 
+    const result = await Card.deleteOne({ _id: cardId });
+
     if (result.deletedCount === 0) {
-      res.status(404).send({ status: 'error', message: 'Запрашиваемая карточка не найдена' });
-      return;
+      throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
     res.send({ status: 'success' });
   } catch (error) {
-    res.status(500).send({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
-export const addLikeToCard = async (req: Request<ICardId>, res: Response) => {
+export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: NextFunction) => {
   try {
     const { cardId } = req.params;
+
+    if (!isValidObjectId(cardId)) {
+      throw new ClientError(INCORRECT_ID_TEXT);
+    }
 
     const result = await Card.findByIdAndUpdate(cardId, {
       $addToSet: {
@@ -73,25 +83,27 @@ export const addLikeToCard = async (req: Request<ICardId>, res: Response) => {
       runValidators: true,
     });
 
-    if (!isValidObjectId(cardId)) {
-      res.status(400).send({ status: 'error', message: 'Некорректный ID карточки' });
-      return;
-    }
-
     if (result === null) {
-      res.status(404).send({ status: 'error', message: 'Запрашиваемая карточка не найдена' });
-      return;
+      throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
     res.send({ status: 'success' });
   } catch (error) {
-    res.status(500).send({ status: 'error', message: error.message });
+    next(error);
   }
 };
 
-export const removeLikeFromCard = async (req: Request<ICardId>, res: Response) => {
+export const removeLikeFromCard = async (
+  req: Request<ICardId>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { cardId } = req.params;
+
+    if (!isValidObjectId(cardId)) {
+      throw new ClientError(INCORRECT_ID_TEXT);
+    }
 
     const result = await Card.findByIdAndUpdate(cardId, {
       $pull: {
@@ -102,18 +114,12 @@ export const removeLikeFromCard = async (req: Request<ICardId>, res: Response) =
       runValidators: true,
     });
 
-    if (!isValidObjectId(cardId)) {
-      res.status(400).send({ status: 'error', message: 'Некорректный ID карточки' });
-      return;
-    }
-
     if (result === null) {
-      res.status(404).send({ status: 'error', message: 'Запрашиваемая карточка не найдена' });
-      return;
+      throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
     res.send({ status: 'success' });
   } catch (error) {
-    res.status(500).send({ status: 'error', message: error.message });
+    next(error);
   }
 };

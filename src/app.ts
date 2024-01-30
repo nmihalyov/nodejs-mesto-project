@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
 
+import errorMiddleware from './middlewares/error';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
 
@@ -27,6 +28,8 @@ app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(errorMiddleware);
 
 app.listen(Number(PORT), () => {
   console.log(`Server is listening on port ${PORT}`);
