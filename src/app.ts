@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
 
+import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
 
 const { PORT = 3000 } = process.env;
@@ -22,6 +23,7 @@ app.use((req: Request, _: Response, next: NextFunction) => {
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use('/users', userRoutes);
+app.use('/cards', cardRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
