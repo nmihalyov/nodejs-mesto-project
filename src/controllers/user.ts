@@ -48,3 +48,45 @@ export const getUserById = async (req: Request<IUserId>, res: Response) => {
     res.status(500).send({ error: error.message });
   }
 };
+
+export const updateUser = async (req: Request<any, any, Partial<IUser>>, res: Response) => {
+  try {
+    const updateInfo = req.body;
+    // @ts-ignore
+    const { _id: id } = req.user;
+
+    const user = await User.findByIdAndUpdate(id, updateInfo, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (user) {
+      res.send(user);
+    } else {
+      res.status(500).send({ error: 'No user with such ID was found' });
+    }
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const updateUserAvatar = async (req: Request<any, any, Pick<IUser, 'avatar'>>, res: Response) => {
+  try {
+    const { avatar } = req.body;
+    // @ts-ignore
+    const { _id: id } = req.user;
+
+    const user = await User.findByIdAndUpdate(id, { avatar }, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (user) {
+      res.send(user);
+    } else {
+      res.status(500).send({ error: 'No user with such ID was found' });
+    }
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+};

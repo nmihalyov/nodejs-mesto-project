@@ -10,6 +10,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 // Временное решение авторизации
 app.use((req: Request, _: Response, next: NextFunction) => {
   // @ts-ignore

@@ -44,3 +44,41 @@ export const deleteCard = async (req: Request<ICardId>, res: Response) => {
     res.status(500).send({ error: error.message });
   }
 };
+
+export const addLikeToCard = async (req: Request<ICardId>, res: Response) => {
+  try {
+    const { cardId } = req.params;
+
+    const result = await Card.findByIdAndUpdate(cardId, {
+      $addToSet: {
+        likes: cardId,
+      },
+    }, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const removeLikeFromCard = async (req: Request<ICardId>, res: Response) => {
+  try {
+    const { cardId } = req.params;
+
+    const result = await Card.findByIdAndUpdate(cardId, {
+      $pull: {
+        likes: cardId,
+      },
+    }, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+};
