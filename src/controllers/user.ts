@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ObjectId } from 'mongoose';
+import { ObjectId, isValidObjectId } from 'mongoose';
 
 import User, { IUser } from '../models/user';
 
@@ -17,9 +17,14 @@ export const createUser = async (req: Request<any, any, IUser>, res: Response) =
       avatar,
     });
 
-    res.status(201).send(user);
+    if (!name || !about || !avatar) {
+      res.status(400).send({ status: 'error', message: 'Некорректные данные' });
+      return;
+    }
+
+    res.status(201).send({ status: 'success', user });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -27,9 +32,9 @@ export const getUsers = async (_: Request, res: Response) => {
   try {
     const users = await User.find({});
 
-    res.send(users);
+    res.send({ status: 'success', users });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -39,13 +44,19 @@ export const getUserById = async (req: Request<IUserId>, res: Response) => {
 
     const user = await User.findById(id);
 
-    if (user) {
-      res.send(user);
-    } else {
-      res.status(500).send({ error: 'No user with such ID was found' });
+    if (!isValidObjectId(id)) {
+      res.status(400).send({ status: 'error', message: 'Некорректный ID пользователя' });
+      return;
     }
+
+    if (!user) {
+      res.status(404).send({ status: 'error', message: 'Запрашиваемый пользователь не найден' });
+      return;
+    }
+
+    res.send({ status: 'success', user });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -60,13 +71,19 @@ export const updateUser = async (req: Request<any, any, Partial<IUser>>, res: Re
       runValidators: true,
     });
 
-    if (user) {
-      res.send(user);
-    } else {
-      res.status(500).send({ error: 'No user with such ID was found' });
+    if (!updateInfo || Object.keys(updateInfo).length === 0) {
+      res.status(400).send({ status: 'error', message: 'Некорректные данные' });
+      return;
     }
+
+    if (!user) {
+      res.status(404).send({ status: 'error', message: 'Запрашиваемый пользователь не найден' });
+      return;
+    }
+
+    res.send({ status: 'success', user });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -81,12 +98,18 @@ export const updateUserAvatar = async (req: Request<any, any, Pick<IUser, 'avata
       runValidators: true,
     });
 
-    if (user) {
-      res.send(user);
-    } else {
-      res.status(500).send({ error: 'No user with such ID was found' });
+    if (!avatar) {
+      res.status(400).send({ status: 'error', message: 'Некорректные данные' });
+      return;
     }
+
+    if (!user) {
+      res.status(404).send({ status: 'error', message: 'Запрашиваемый пользователь не найден' });
+      return;
+    }
+
+    res.send({ status: 'success', user });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };

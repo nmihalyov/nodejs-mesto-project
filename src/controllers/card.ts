@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ObjectId } from 'mongoose';
+import { ObjectId, isValidObjectId } from 'mongoose';
 
 import Card, { ICard } from '../models/card';
 
@@ -13,9 +13,9 @@ export const getCards = async (_: Request, res: Response) => {
   try {
     const cards = await Card.find({});
 
-    res.send(cards);
+    res.send({ status: 'success', cards });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -27,9 +27,14 @@ export const createCard = async (req: Request<any, any, TCreateCard>, res: Respo
 
     const card = await Card.create({ name, link, owner: _id });
 
-    res.status(201).send(card);
+    if (!name || !link) {
+      res.status(400).send({ status: 'error', message: 'Некорректные данные' });
+      return;
+    }
+
+    res.status(201).send({ status: 'success', card });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -39,9 +44,19 @@ export const deleteCard = async (req: Request<ICardId>, res: Response) => {
 
     const result = await Card.deleteOne({ _id: cardId });
 
-    res.send(result);
+    if (!isValidObjectId(cardId)) {
+      res.status(400).send({ status: 'error', message: 'Некорректный ID карточки' });
+      return;
+    }
+
+    if (result.deletedCount === 0) {
+      res.status(404).send({ status: 'error', message: 'Запрашиваемая карточка не найдена' });
+      return;
+    }
+
+    res.send({ status: 'success' });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -58,9 +73,19 @@ export const addLikeToCard = async (req: Request<ICardId>, res: Response) => {
       runValidators: true,
     });
 
-    res.send(result);
+    if (!isValidObjectId(cardId)) {
+      res.status(400).send({ status: 'error', message: 'Некорректный ID карточки' });
+      return;
+    }
+
+    if (result === null) {
+      res.status(404).send({ status: 'error', message: 'Запрашиваемая карточка не найдена' });
+      return;
+    }
+
+    res.send({ status: 'success' });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
 
@@ -77,8 +102,18 @@ export const removeLikeFromCard = async (req: Request<ICardId>, res: Response) =
       runValidators: true,
     });
 
-    res.send(result);
+    if (!isValidObjectId(cardId)) {
+      res.status(400).send({ status: 'error', message: 'Некорректный ID карточки' });
+      return;
+    }
+
+    if (result === null) {
+      res.status(404).send({ status: 'error', message: 'Запрашиваемая карточка не найдена' });
+      return;
+    }
+
+    res.send({ status: 'success' });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ status: 'error', message: error.message });
   }
 };
