@@ -1,5 +1,8 @@
+import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { ObjectId, isValidObjectId } from 'mongoose';
+import AuthError from '../errors/auth';
 
 import ClientError from '../errors/client';
 import NotFoundError from '../errors/notFound';
@@ -18,19 +21,64 @@ export const createUser = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, about, avatar } = req.body;
+    const {
+      name,
+      about,
+      avatar,
+      email,
+      password,
+    } = req.body;
 
-    if (!name || !about || !avatar) {
+    if (!name || !about || !avatar || !email || !password) {
       throw new ClientError(INCORRECT_DATA_TEXT);
     }
+
+    const hash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       about,
       avatar,
+      email,
+      password: hash,
     });
 
     res.status(201).send({ status: 'success', user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const loginUser = async (
+  req: Request<any, any, Pick<IUser, 'email' | 'password'>>,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      throw new ClientError(INCORRECT_DATA_TEXT);
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_TEXT);
+    }
+
+    const isSuccess = await bcrypt.compare(password, user.password);
+
+    if (!isSuccess) {
+      throw new AuthError(INCORRECT_DATA_TEXT);
+    }
+
+    const { _id: id } = user;
+
+    const token = jwt.sign({ id }, 'some-secret-key', { expiresIn: '7d' });
+
+    res.cookie('authorization', token, { httpOnly: true });
+    res.send({ status: 'success', user });
   } catch (error) {
     next(error);
   }
@@ -95,7 +143,11 @@ export const updateUser = async (
   }
 };
 
-export const updateUserAvatar = async (req: Request<any, any, Pick<IUser, 'avatar'>>, res: Response, next: NextFunction) => {
+export const updateUserAvatar = async (
+  req: Request<any, any, Pick<IUser, 'avatar'>>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { avatar } = req.body;
     // @ts-ignore

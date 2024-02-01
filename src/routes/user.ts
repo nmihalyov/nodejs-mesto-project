@@ -4,6 +4,7 @@ import {
   createUser,
   getUserById,
   getUsers,
+  loginUser,
   updateUser,
   updateUserAvatar,
 } from '../controllers/user';
@@ -11,9 +12,10 @@ import {
 const router = Router();
 
 router.get('/', getUsers);
-router.get('/:id', getUserById);
-router.post('/', createUser);
+router.post('/signup', createUser);
+router.post('/signin', loginUser);
 router.patch('/me', updateUser);
 router.patch('/me/avatar', updateUserAvatar);
+router.get('/:id', getUserById);
 
 export default router;

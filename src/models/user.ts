@@ -1,9 +1,14 @@
 import mongoose from 'mongoose';
+import { isEmail } from 'validator';
 
 export interface IUser {
   name: string;
   about: string;
   avatar: string;
+  password: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -23,6 +28,29 @@ const userSchema = new mongoose.Schema<IUser>({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator: (value: string) => isEmail(value),
+    },
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now(),
+  },
+}, {
+  versionKey: false,
+  timestamps: true,
 });
 
 export default mongoose.model('user', userSchema);

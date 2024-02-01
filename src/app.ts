@@ -6,7 +6,7 @@ import errorMiddleware from './middlewares/error';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 const app = express();
 
 app.use(express.json());

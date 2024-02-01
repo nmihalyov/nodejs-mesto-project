@@ -6,6 +6,7 @@ export interface ICard {
   owner: ObjectId;
   likes: ObjectId[];
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const cardSchema = new mongoose.Schema<ICard>({
@@ -32,6 +33,13 @@ const cardSchema = new mongoose.Schema<ICard>({
     type: Date,
     default: Date.now(),
   },
+  updatedAt: {
+    type: Date,
+    default: Date.now(),
+  },
+}, {
+  versionKey: false,
+  timestamps: true,
 });
 
 export default mongoose.model('card', cardSchema);
