@@ -2,10 +2,11 @@ import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ObjectId, isValidObjectId } from 'mongoose';
-import AuthError from '../errors/auth';
 
+import AuthError from '../errors/auth';
 import ClientError from '../errors/client';
 import NotFoundError from '../errors/notFound';
+import { IRequestWithUserID } from '../middlewares/auth';
 import User, { IUser } from '../models/user';
 
 interface IUserId {
@@ -61,13 +62,13 @@ export const loginUser = async (
       throw new ClientError(INCORRECT_DATA_TEXT);
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
-    const isSuccess = await bcrypt.compare(password, user.password);
+    const isSuccess = await bcrypt.compare(password, (user as Required<IUser>).password);
 
     if (!isSuccess) {
       throw new AuthError(INCORRECT_DATA_TEXT);
@@ -77,7 +78,9 @@ export const loginUser = async (
 
     const token = jwt.sign({ id }, 'some-secret-key', { expiresIn: '7d' });
 
-    res.cookie('authorization', token, { httpOnly: true });
+    user.password = undefined;
+
+    res.cookie('session_token', token, { httpOnly: true });
     res.send({ status: 'success', user });
   } catch (error) {
     next(error);
@@ -89,6 +92,25 @@ export const getUsers = async (_: Request, res: Response, next: NextFunction) =>
     const users = await User.find({});
 
     res.send({ status: 'success', users });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserProfile = async (
+  req: IRequestWithUserID,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.user?.id;
+    const user = await User.findOne({ _id: id });
+
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_TEXT);
+    }
+
+    res.send({ status: 'success', user });
   } catch (error) {
     next(error);
   }
@@ -121,8 +143,7 @@ export const updateUser = async (
 ) => {
   try {
     const updateInfo = req.body;
-    // @ts-ignore
-    const { _id: id } = req.user;
+    const id = (req as IRequestWithUserID).user?.id;
 
     if (!updateInfo || Object.keys(updateInfo).length === 0) {
       throw new ClientError(INCORRECT_DATA_TEXT);
@@ -150,8 +171,7 @@ export const updateUserAvatar = async (
 ) => {
   try {
     const { avatar } = req.body;
-    // @ts-ignore
-    const { _id: id } = req.user;
+    const id = (req as IRequestWithUserID).user?.id;
 
     if (!avatar) {
       throw new ClientError(INCORRECT_DATA_TEXT);

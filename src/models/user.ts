@@ -5,7 +5,7 @@ export interface IUser {
   name: string;
   about: string;
   avatar: string;
-  password: string;
+  password?: string;
   email: string;
   createdAt: Date;
   updatedAt: Date;
@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema<IUser>({
   password: {
     type: String,
     required: true,
+    select: false,
   },
   createdAt: {
     type: Date,
