@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
 
+import { celebrate, Joi } from 'celebrate';
 import { createUser, loginUser } from './controllers/user';
 import auth from './middlewares/auth';
 import errorMiddleware from './middlewares/error';
@@ -18,8 +19,21 @@ app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.post('/signup', createUser);
-app.post('/signin', loginUser);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
+    avatar: Joi.string().uri().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().alphanum().min(8).required(),
+  }),
+}), createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().alphanum().min(8).required(),
+  }),
+}), loginUser);
 
 app.use(auth);
 

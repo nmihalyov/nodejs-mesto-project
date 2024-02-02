@@ -13,6 +13,8 @@ interface IUserId {
   id: ObjectId;
 }
 
+type TUpdateUserData = Partial<Pick<IUser, 'name' | 'about' | 'avatar' | 'email'>>;
+
 const NOT_FOUND_TEXT = 'Запрашиваемый пользователь не найден';
 const INCORRECT_DATA_TEXT = 'Некорректные данные';
 
@@ -137,7 +139,7 @@ export const getUserById = async (req: Request<IUserId>, res: Response, next: Ne
 };
 
 export const updateUser = async (
-  req: Request<any, any, Partial<IUser>>,
+  req: Request<any, any, TUpdateUserData>,
   res: Response,
   next: NextFunction,
 ) => {
