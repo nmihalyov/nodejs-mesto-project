@@ -10,6 +10,7 @@ import { createUser, loginUser } from './controllers/user';
 import auth from './middlewares/auth';
 import errorMiddleware from './middlewares/error';
 import { errorLogger, requestLogger } from './middlewares/logger';
+import limiter from './middlewares/rateLimit';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
 
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(helmet());
+app.use(limiter);
 
 mongoose.connect(process.env.DATABASE_URL || '');
 
