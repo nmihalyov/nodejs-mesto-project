@@ -83,12 +83,17 @@ export const loginUser = async (
     }
 
     const { _id: id } = user;
-
     const token = jwt.sign({ id }, 'some-secret-key', { expiresIn: '7d' });
+    const DAY_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 7;
 
     user.password = undefined;
 
-    res.cookie('session_token', token, { httpOnly: true, secure: true });
+    res.cookie('session_token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: true,
+      maxAge: DAY_IN_MILLISECONDS,
+    });
     res.send({ status: 'success', user });
   } catch (error) {
     next(error);
