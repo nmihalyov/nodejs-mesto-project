@@ -1,13 +1,19 @@
-// TODO: type narrowing
 import { celebrate, Joi } from 'celebrate';
 import cookieParser from 'cookie-parser';
 import 'dotenv/config';
-import express, { json, urlencoded } from 'express';
+import express, {
+  json,
+  NextFunction,
+  Request,
+  Response,
+  urlencoded,
+} from 'express';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
 import path from 'path';
 
 import { createUser, loginUser } from './controllers/user';
+import NotFoundError from './errors/notFound';
 import auth from './middlewares/auth';
 import errorMiddleware from './middlewares/error';
 import { errorLogger, requestLogger } from './middlewares/logger';
@@ -49,6 +55,10 @@ app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next(new NotFoundError('Несуществующий маршрут'));
+});
 
 app.use(errorLogger);
 app.use(errorMiddleware);
