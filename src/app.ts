@@ -1,12 +1,13 @@
+import { celebrate, Joi } from 'celebrate';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
 
-import { celebrate, Joi } from 'celebrate';
 import { createUser, loginUser } from './controllers/user';
 import auth from './middlewares/auth';
 import errorMiddleware from './middlewares/error';
+import { errorLogger, requestLogger } from './middlewares/logger';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
 
@@ -16,6 +17,7 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -42,6 +44,7 @@ app.use('/cards', cardRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(errorLogger);
 app.use(errorMiddleware);
 
 app.listen(Number(PORT), () => {
