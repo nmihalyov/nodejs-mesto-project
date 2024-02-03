@@ -2,13 +2,13 @@ import { celebrate, Joi } from 'celebrate';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
+import helmet from 'helmet';
 import mongoose from 'mongoose';
 import path from 'path';
 
 import { createUser, loginUser } from './controllers/user';
 import auth from './middlewares/auth';
 import errorMiddleware from './middlewares/error';
-import headers from './middlewares/headers';
 import { errorLogger, requestLogger } from './middlewares/logger';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
@@ -22,7 +22,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
-app.use(headers);
+app.use(helmet());
 
 mongoose.connect(process.env.DATABASE_URL || '');
 
