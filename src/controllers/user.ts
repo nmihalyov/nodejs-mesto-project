@@ -7,6 +7,7 @@ import { ObjectId, isValidObjectId } from 'mongoose';
 import AuthError from '../errors/auth';
 import ClientError from '../errors/client';
 import NotFoundError from '../errors/notFound';
+import getPrivateKey from '../helpers/getPrivateKey';
 import { IRequestWithUserID } from '../middlewares/auth';
 import User, { IUser } from '../models/user';
 
@@ -83,7 +84,8 @@ export const loginUser = async (
     }
 
     const { _id: id } = user;
-    const token = jwt.sign({ id }, 'some-secret-key', { expiresIn: '7d' });
+    const privateKey = getPrivateKey();
+    const token = jwt.sign({ id }, privateKey, { expiresIn: '7d' });
     const DAY_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 7;
 
     user.password = undefined;

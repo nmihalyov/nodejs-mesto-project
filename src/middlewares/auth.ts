@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongoose';
 
 import AuthError from '../errors/auth';
+import getPrivateKey from '../helpers/getPrivateKey';
 
 interface IID {
   id: ObjectId;
@@ -23,7 +24,8 @@ const authMiddleware = (
     throw new AuthError('Требуется авторизация');
   }
 
-  const payload = jwt.verify(token, 'some-secret-key') as IID;
+  const privateKey = getPrivateKey();
+  const payload = jwt.verify(token, privateKey) as IID;
 
   req.user = payload;
 

@@ -1,5 +1,6 @@
 import { celebrate, Joi } from 'celebrate';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
@@ -12,6 +13,8 @@ import { errorLogger, requestLogger } from './middlewares/logger';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
 
+dotenv.config();
+
 const { PORT = 3001 } = process.env;
 const app = express();
 
@@ -21,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(headers);
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
+mongoose.connect(process.env.DATABASE_URL || '');
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({

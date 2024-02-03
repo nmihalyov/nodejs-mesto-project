@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "PORT=3001 ts-node src/app.ts",
-    "dev": "PORT=3001 ts-node-dev src/app.ts",
+    "start": "NODE_ENV=dev PORT=3001 ts-node src/app.ts",
+    "dev": "NODE_ENV=dev PORT=3001 ts-node-dev src/app.ts",
     "build": "tsc",
     "lint": "npx eslint src/**/*.ts"
   },
@@ -31,6 +31,7 @@
     "bcryptjs": "^2.4.3",
     "celebrate": "^15.0.3",
     "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.1",
     "escape-html": "^1.0.3",
     "express": "^4.18.2",
     "express-winston": "^4.2.0",
