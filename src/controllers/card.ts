@@ -1,3 +1,4 @@
+import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import { ObjectId, isValidObjectId } from 'mongoose';
 
@@ -38,7 +39,11 @@ export const createCard = async (
       throw new ClientError('Некорректные данные');
     }
 
-    const card = await Card.create({ name, link, owner: id });
+    const card = await Card.create({
+      name: escape(name),
+      link: escape(link),
+      owner: id,
+    });
 
     res.status(201).send({ status: 'success', card });
   } catch (error) {

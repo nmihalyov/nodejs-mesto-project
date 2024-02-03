@@ -7,6 +7,7 @@ import path from 'path';
 import { createUser, loginUser } from './controllers/user';
 import auth from './middlewares/auth';
 import errorMiddleware from './middlewares/error';
+import headers from './middlewares/headers';
 import { errorLogger, requestLogger } from './middlewares/logger';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
+app.use(headers);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 

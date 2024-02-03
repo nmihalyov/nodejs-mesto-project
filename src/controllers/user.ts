@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ObjectId, isValidObjectId } from 'mongoose';
@@ -39,10 +40,10 @@ export const createUser = async (
     const hash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      about,
-      avatar,
-      email,
+      name: escape(name),
+      about: escape(about),
+      avatar: escape(avatar),
+      email: escape(email),
       password: hash,
     });
 
@@ -87,7 +88,7 @@ export const loginUser = async (
 
     user.password = undefined;
 
-    res.cookie('session_token', token, { httpOnly: true });
+    res.cookie('session_token', token, { httpOnly: true, secure: true });
     res.send({ status: 'success', user });
   } catch (error) {
     next(error);
@@ -156,7 +157,14 @@ export const updateUser = async (
       throw new ClientError(INCORRECT_DATA_TEXT);
     }
 
-    const user = await User.findByIdAndUpdate(id, updateInfo, {
+    const data: Record<string, string> = {};
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [key, value] of Object.entries(updateInfo)) {
+      data[key] = escape(value);
+    }
+
+    const user = await User.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
     });
@@ -184,7 +192,9 @@ export const updateUserAvatar = async (
       throw new ClientError(INCORRECT_DATA_TEXT);
     }
 
-    const user = await User.findByIdAndUpdate(id, { avatar }, {
+    const user = await User.findByIdAndUpdate(id, {
+      avatar: escape(avatar),
+    }, {
       new: true,
       runValidators: true,
     });
