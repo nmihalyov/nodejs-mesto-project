@@ -4,7 +4,6 @@ import { ObjectId, isValidObjectId } from 'mongoose';
 
 import ClientError from '../errors/client';
 import NotFoundError from '../errors/notFound';
-import { IRequestWithUserID } from '../middlewares/auth';
 import Card, { ICard } from '../models/card';
 
 type TCreateCard = Pick<ICard, 'name' | 'link'>;
@@ -32,7 +31,7 @@ export const createCard = async (
   next: NextFunction,
 ) => {
   try {
-    const id = (req as IRequestWithUserID).user?.id;
+    const id = req.user?.id;
     const { name, link } = req.body;
 
     if (!name || !link) {
@@ -54,7 +53,7 @@ export const createCard = async (
 export const deleteCard = async (req: Request<ICardId>, res: Response, next: NextFunction) => {
   try {
     const { cardId } = req.params;
-    const id = (req as unknown as IRequestWithUserID).user?.id;
+    const id = req.user?.id;
 
     if (!isValidObjectId(cardId)) {
       throw new ClientError(INCORRECT_ID_TEXT);

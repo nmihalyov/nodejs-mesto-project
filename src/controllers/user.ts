@@ -8,7 +8,6 @@ import AuthError from '../errors/auth';
 import ClientError from '../errors/client';
 import NotFoundError from '../errors/notFound';
 import getPrivateKey from '../helpers/getPrivateKey';
-import { IRequestWithUserID } from '../middlewares/auth';
 import User, { IUser } from '../models/user';
 
 interface IUserId {
@@ -112,11 +111,7 @@ export const getUsers = async (_: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export const getUserProfile = async (
-  req: IRequestWithUserID,
-  res: Response,
-  next: NextFunction,
-) => {
+export const getUserProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.user?.id;
     const user = await User.findOne({ _id: id });
@@ -158,7 +153,7 @@ export const updateUser = async (
 ) => {
   try {
     const updateInfo = req.body;
-    const id = (req as IRequestWithUserID).user?.id;
+    const id = req.user?.id;
 
     if (!updateInfo || Object.keys(updateInfo).length === 0) {
       throw new ClientError(INCORRECT_DATA_TEXT);
@@ -193,7 +188,7 @@ export const updateUserAvatar = async (
 ) => {
   try {
     const { avatar } = req.body;
-    const id = (req as IRequestWithUserID).user?.id;
+    const id = req.user?.id;
 
     if (!avatar) {
       throw new ClientError(INCORRECT_DATA_TEXT);

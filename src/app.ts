@@ -1,7 +1,8 @@
+// TODO: type narrowing
 import { celebrate, Joi } from 'celebrate';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
-import express from 'express';
+import 'dotenv/config';
+import express, { json, urlencoded } from 'express';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
 import path from 'path';
@@ -14,14 +15,12 @@ import limiter from './middlewares/rateLimit';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
 
-dotenv.config();
-
 const { PORT = 3001 } = process.env;
 const app = express();
 
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(json());
+app.use(urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(helmet());
 app.use(limiter);
