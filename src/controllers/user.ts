@@ -72,11 +72,11 @@ export const loginUser = async (
 
     const user = await User.findOne({ email }).select('+password');
 
-    if (!user) {
+    if (!user || !user.password) {
       throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
-    const isSuccess = await bcrypt.compare(password, (user as Required<IUser>).password);
+    const isSuccess = await bcrypt.compare(password, user.password);
 
     if (!isSuccess) {
       throw new AuthError(INCORRECT_DATA_TEXT);
