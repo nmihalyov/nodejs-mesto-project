@@ -48,6 +48,11 @@ export const createUser = async (
 
     res.status(201).send({ status: 'success', user });
   } catch (error) {
+    if (error.code === 11000) {
+      error.statusCode = 409;
+      error.message = 'Пользователь с таким email уже существует';
+    }
+
     next(error);
   }
 };
