@@ -1,4 +1,3 @@
-import { celebrate, Joi } from 'celebrate';
 import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import express, {
@@ -19,6 +18,7 @@ import { errorLogger, requestLogger } from './middlewares/logger';
 import limiter from './middlewares/rateLimit';
 import cardRoutes from './routes/card';
 import userRoutes from './routes/user';
+import { signInValidator, signUpValidator } from './validators/user';
 
 const { PORT = 3001 } = process.env;
 const app = express();
@@ -32,21 +32,8 @@ app.use(limiter);
 
 mongoose.connect(process.env.DATABASE_URL || '');
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).required(),
-    about: Joi.string().min(2).max(30).required(),
-    avatar: Joi.string().required(),
-    email: Joi.string().required(),
-    password: Joi.string().alphanum().min(8).required(),
-  }),
-}), createUser);
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().email().required(),
-    password: Joi.string().alphanum().min(8).required(),
-  }),
-}), loginUser);
+app.post('/signup', signUpValidator, createUser);
+app.post('/signin', signInValidator, loginUser);
 
 app.use(auth);
 

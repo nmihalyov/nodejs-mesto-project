@@ -8,7 +8,7 @@ import Card, { ICard } from '../models/card';
 
 type TCreateCard = Pick<ICard, 'name' | 'link'>;
 
-interface ICardId {
+export interface ICardId {
   cardId: ObjectId;
 }
 

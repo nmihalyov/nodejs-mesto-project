@@ -11,7 +11,7 @@ import NotFoundError from '../errors/notFound';
 import getPrivateKey from '../helpers/getPrivateKey';
 import User, { IUser } from '../models/user';
 
-interface IUserId {
+export interface IUserId {
   id: ObjectId;
 }
 

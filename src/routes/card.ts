@@ -1,42 +1,30 @@
-import { celebrate, Joi } from 'celebrate';
 import { Router } from 'express';
 
 import {
+  ICardId,
   addLikeToCard,
   createCard,
   deleteCard,
   getCards,
   removeLikeFromCard,
 } from '../controllers/card';
+import {
+  addLikeToCardValidator,
+  createCardValidator,
+  deleteCardValidator,
+  removeLikeFromCardValidator,
+} from '../validators/card';
 
 const router = Router();
 
 router.get('/', getCards);
 
-router.post('/', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30)
-      .required(),
-    link: Joi.string().required(),
-  }),
-}), createCard);
+router.post('/', createCardValidator, createCard);
 
-router.delete('/:cardId', celebrate({
-  params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
-  }),
-}), deleteCard);
+router.delete<ICardId>('/:cardId', deleteCardValidator, deleteCard);
 
-router.put('/:cardId/likes', celebrate({
-  params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
-  }),
-}), addLikeToCard);
+router.put<ICardId>('/:cardId/likes', addLikeToCardValidator, addLikeToCard);
 
-router.delete('/:cardId/likes', celebrate({
-  params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
-  }),
-}), removeLikeFromCard);
+router.delete<ICardId>('/:cardId/likes', removeLikeFromCardValidator, removeLikeFromCard);
 
 export default router;
