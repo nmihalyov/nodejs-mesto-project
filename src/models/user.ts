@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema<IUser>({
     required: true,
     validate: {
       validator: (value: string) => isURL(value),
+      message: 'Некорректный формат URL',
     },
   },
   email: {
@@ -37,6 +38,7 @@ const userSchema = new mongoose.Schema<IUser>({
     unique: true,
     validate: {
       validator: (value: string) => isEmail(value),
+      message: 'Некорректный формат E-mail',
     },
   },
   password: {

@@ -1,8 +1,7 @@
 import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
-import { ObjectId, isValidObjectId } from 'mongoose';
+import { ObjectId } from 'mongoose';
 
-import ClientError from '../errors/client';
 import ForbiddenError from '../errors/forbidden';
 import NotFoundError from '../errors/notFound';
 import Card, { ICard } from '../models/card';
@@ -14,7 +13,6 @@ interface ICardId {
 }
 
 const NOT_FOUND_TEXT = 'Запрашиваемая карточка не найдена';
-const INCORRECT_ID_TEXT = 'Некорректный ID карточки';
 
 export const getCards = async (_: Request, res: Response, next: NextFunction) => {
   try {
@@ -52,10 +50,6 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
     const { cardId } = req.params;
     const id = req.user?.id;
 
-    if (!isValidObjectId(cardId)) {
-      throw new ClientError(INCORRECT_ID_TEXT);
-    }
-
     const card = await Card.findOne({ _id: cardId });
 
     if (!card) {
@@ -77,10 +71,6 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
 export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: NextFunction) => {
   try {
     const { cardId } = req.params;
-
-    if (!isValidObjectId(cardId)) {
-      throw new ClientError(INCORRECT_ID_TEXT);
-    }
 
     const card = await Card.findByIdAndUpdate(cardId, {
       $addToSet: {
@@ -108,10 +98,6 @@ export const removeLikeFromCard = async (
 ) => {
   try {
     const { cardId } = req.params;
-
-    if (!isValidObjectId(cardId)) {
-      throw new ClientError(INCORRECT_ID_TEXT);
-    }
 
     const card = await Card.findByIdAndUpdate(cardId, {
       $pull: {

@@ -10,7 +10,6 @@ import express, {
 } from 'express';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
-import path from 'path';
 
 import { createUser, loginUser } from './controllers/user';
 import NotFoundError from './errors/notFound';
@@ -37,8 +36,8 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     about: Joi.string().min(2).max(30).required(),
-    avatar: Joi.string().uri().required(),
-    email: Joi.string().email().required(),
+    avatar: Joi.string().required(),
+    email: Joi.string().required(),
     password: Joi.string().alphanum().min(8).required(),
   }),
 }), createUser);
@@ -53,8 +52,6 @@ app.use(auth);
 
 app.use('/users', userRoutes);
 app.use('/cards', cardRoutes);
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(new NotFoundError('Несуществующий маршрут'));

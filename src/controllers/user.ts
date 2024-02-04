@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { ObjectId, isValidObjectId } from 'mongoose';
+import { ObjectId } from 'mongoose';
 
 import AuthError from '../errors/auth';
 import ClientError from '../errors/client';
@@ -122,10 +122,6 @@ export const getUserProfile = async (req: Request, res: Response, next: NextFunc
 export const getUserById = async (req: Request<IUserId>, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-
-    if (!isValidObjectId(id)) {
-      throw new ClientError('Некорректный ID пользователя');
-    }
 
     const user = await User.findById(id);
 

@@ -19,20 +19,20 @@ router.patch('/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri(),
+    avatar: Joi.string(),
     email: Joi.string().email(),
   }),
 }), updateUser);
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().uri().required(),
+    avatar: Joi.string().required(),
   }),
 }), updateUserAvatar);
 
 router.get('/:id', celebrate({
   params: Joi.object().keys({
-    id: Joi.string().alphanum().required(),
+    id: Joi.string().hex().length(24).required(),
   }),
 }), getUserById);
 

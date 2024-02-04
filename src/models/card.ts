@@ -22,6 +22,7 @@ const cardSchema = new mongoose.Schema<ICard>({
     required: true,
     validate: {
       validator: (value: string) => isURL(value),
+      message: 'Некорректный формат URL',
     },
   },
   owner: {
@@ -35,11 +36,11 @@ const cardSchema = new mongoose.Schema<ICard>({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
 }, {
   versionKey: false,
