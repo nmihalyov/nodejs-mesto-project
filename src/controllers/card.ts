@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ObjectId, isValidObjectId } from 'mongoose';
 
 import ClientError from '../errors/client';
+import ForbiddenError from '../errors/forbidden';
 import NotFoundError from '../errors/notFound';
 import Card, { ICard } from '../models/card';
 
@@ -59,11 +60,17 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
       throw new ClientError(INCORRECT_ID_TEXT);
     }
 
-    const card = await Card.findOneAndDelete({ _id: cardId, owner: id });
+    const card = await Card.findOne({ _id: cardId });
 
     if (!card) {
       throw new NotFoundError(NOT_FOUND_TEXT);
     }
+
+    if (card?.owner.toString() !== id) {
+      throw new ForbiddenError('Доступ запрещен');
+    }
+
+    await card?.deleteOne();
 
     res.send({ status: 'success', card });
   } catch (error) {
