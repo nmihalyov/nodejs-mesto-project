@@ -42,16 +42,15 @@ const userSchema = new mongoose.Schema<IUser>({
   password: {
     type: String,
     required: true,
-    minLength: 8,
     select: false,
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
 }, {
   versionKey: false,
