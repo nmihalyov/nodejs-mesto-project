@@ -59,13 +59,13 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
       throw new ClientError(INCORRECT_ID_TEXT);
     }
 
-    const result = await Card.deleteOne({ _id: cardId, owner: id });
+    const card = await Card.findOneAndDelete({ _id: cardId, owner: id });
 
-    if (result.deletedCount === 0) {
+    if (!card) {
       throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
-    res.send({ status: 'success' });
+    res.send({ status: 'success', card });
   } catch (error) {
     next(error);
   }

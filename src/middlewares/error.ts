@@ -12,11 +12,15 @@ const errorMiddleware = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) => {
-  if (err instanceof Joi.ValidationError) {
-    const { message } = err.details[0];
+  if ('details' in err && err.details instanceof Map) {
+    const validationError = err.details.values().next().value;
 
-    res.status(400).send({ status: 'error', message });
-    return;
+    if (validationError instanceof Joi.ValidationError) {
+      const { message } = validationError;
+
+      res.status(400).send({ status: 'error', message });
+      return;
+    }
   }
 
   const { statusCode = 500 } = err;
