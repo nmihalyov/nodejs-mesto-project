@@ -2,9 +2,8 @@ import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import { ObjectId } from 'mongoose';
 
-import ForbiddenError from '../errors/forbidden';
-import NotFoundError from '../errors/notFound';
-import Card, { ICard } from '../models/card';
+import { ForbiddenError, NotFoundError } from '../errors';
+import { Card, type ICard } from '../models';
 
 type TCreateCard = Pick<ICard, 'name' | 'link'>;
 

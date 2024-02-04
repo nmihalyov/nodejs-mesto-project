@@ -4,12 +4,14 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongoose';
 
-import AuthError from '../errors/auth';
-import ClientError from '../errors/client';
-import ConflictError from '../errors/conflict';
-import NotFoundError from '../errors/notFound';
+import {
+  AuthError,
+  ClientError,
+  ConflictError,
+  NotFoundError,
+} from '../errors';
 import getPrivateKey from '../helpers/getPrivateKey';
-import User, { IUser } from '../models/user';
+import { User, type IUser } from '../models';
 
 export interface IUserId {
   id: ObjectId;

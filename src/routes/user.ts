@@ -1,14 +1,14 @@
 import { Router } from 'express';
 
 import {
-  IUserId,
   getUserById,
   getUserProfile,
   getUsers,
   updateUser,
   updateUserAvatar,
-} from '../controllers/user';
-import { getUserByIdValidator, updateUserAvatarValidator, updateUserValidator } from '../validators/user';
+  type IUserId,
+} from '../controllers';
+import { getUserByIdValidator, updateUserAvatarValidator, updateUserValidator } from '../validators';
 
 const router = Router();
 

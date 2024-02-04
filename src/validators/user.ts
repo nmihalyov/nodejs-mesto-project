@@ -1,6 +1,6 @@
 import { celebrate, Joi } from 'celebrate';
 
-import { IUserId } from '../controllers/user';
+import { type IUserId } from '../controllers';
 
 export const signUpValidator = celebrate({
   body: Joi.object().keys({

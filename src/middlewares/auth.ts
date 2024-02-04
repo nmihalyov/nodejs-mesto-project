@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import AuthError from '../errors/auth';
+import { AuthError } from '../errors';
 import getPrivateKey from '../helpers/getPrivateKey';
 
 const authMiddleware = (req: Request, _: Response, next: NextFunction) => {

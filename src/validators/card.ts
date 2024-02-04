@@ -1,6 +1,6 @@
 import { celebrate, Joi } from 'celebrate';
 
-import { ICardId } from '../controllers/card';
+import { type ICardId } from '../controllers';
 
 export const createCardValidator = celebrate({
   body: Joi.object().keys({

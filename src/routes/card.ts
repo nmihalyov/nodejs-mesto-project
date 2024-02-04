@@ -7,13 +7,13 @@ import {
   deleteCard,
   getCards,
   removeLikeFromCard,
-} from '../controllers/card';
+} from '../controllers';
 import {
   addLikeToCardValidator,
   createCardValidator,
   deleteCardValidator,
   removeLikeFromCardValidator,
-} from '../validators/card';
+} from '../validators';
 
 const router = Router();
 
