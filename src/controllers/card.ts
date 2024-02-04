@@ -35,10 +35,6 @@ export const createCard = async (
     const id = req.user?.id;
     const { name, link } = req.body;
 
-    if (!name || !link) {
-      throw new ClientError('Некорректные данные');
-    }
-
     const card = await Card.create({
       name: escape(name),
       link: escape(link),
@@ -86,7 +82,7 @@ export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: 
       throw new ClientError(INCORRECT_ID_TEXT);
     }
 
-    const result = await Card.findByIdAndUpdate(cardId, {
+    const card = await Card.findByIdAndUpdate(cardId, {
       $addToSet: {
         likes: cardId,
       },
@@ -95,11 +91,11 @@ export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: 
       runValidators: true,
     });
 
-    if (result === null) {
+    if (card === null) {
       throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
-    res.send({ status: 'success' });
+    res.send({ status: 'success', card });
   } catch (error) {
     next(error);
   }
@@ -117,7 +113,7 @@ export const removeLikeFromCard = async (
       throw new ClientError(INCORRECT_ID_TEXT);
     }
 
-    const result = await Card.findByIdAndUpdate(cardId, {
+    const card = await Card.findByIdAndUpdate(cardId, {
       $pull: {
         likes: cardId,
       },
@@ -126,11 +122,11 @@ export const removeLikeFromCard = async (
       runValidators: true,
     });
 
-    if (result === null) {
+    if (card === null) {
       throw new NotFoundError(NOT_FOUND_TEXT);
     }
 
-    res.send({ status: 'success' });
+    res.send({ status: 'success', card });
   } catch (error) {
     next(error);
   }

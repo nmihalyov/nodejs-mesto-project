@@ -8,7 +8,7 @@ export interface IUser {
   email: string;
   createdAt: Date;
   updatedAt: Date;
-  password?: string;
+  password: string;
 }
 
 const userSchema = new mongoose.Schema<IUser>({

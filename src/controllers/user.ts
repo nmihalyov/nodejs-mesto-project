@@ -6,6 +6,7 @@ import { ObjectId, isValidObjectId } from 'mongoose';
 
 import AuthError from '../errors/auth';
 import ClientError from '../errors/client';
+import ConflictError from '../errors/conflict';
 import NotFoundError from '../errors/notFound';
 import getPrivateKey from '../helpers/getPrivateKey';
 import User, { IUser } from '../models/user';
@@ -33,10 +34,6 @@ export const createUser = async (
       password,
     } = req.body;
 
-    if (!name || !about || !avatar || !email || !password) {
-      throw new ClientError(INCORRECT_DATA_TEXT);
-    }
-
     const hash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
@@ -50,8 +47,8 @@ export const createUser = async (
     res.status(201).send({ status: 'success', user });
   } catch (error) {
     if (error.code === 11000) {
-      error.statusCode = 409;
-      error.message = 'Пользователь с таким email уже существует';
+      next(new ConflictError('Пользователь с таким email уже существует'));
+      return;
     }
 
     next(error);
@@ -66,14 +63,10 @@ export const loginUser = async (
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      throw new ClientError(INCORRECT_DATA_TEXT);
-    }
-
     const user = await User.findOne({ email }).select('+password');
 
-    if (!user || !user.password) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
+    if (!user) {
+      throw new AuthError(INCORRECT_DATA_TEXT);
     }
 
     const isSuccess = await bcrypt.compare(password, user.password);
@@ -87,7 +80,7 @@ export const loginUser = async (
     const token = jwt.sign({ id }, privateKey, { expiresIn: '7d' });
     const DAY_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 7;
 
-    user.password = undefined;
+    (user as Partial<IUser>).password = undefined;
 
     res.cookie('session_token', token, {
       httpOnly: true,
@@ -155,16 +148,15 @@ export const updateUser = async (
     const updateInfo = req.body;
     const id = req.user?.id;
 
-    if (!updateInfo || Object.keys(updateInfo).length === 0) {
+    if (Object.keys(updateInfo).length === 0) {
       throw new ClientError(INCORRECT_DATA_TEXT);
     }
 
     const data: Record<string, string> = {};
 
-    // eslint-disable-next-line no-restricted-syntax
-    for (const [key, value] of Object.entries(updateInfo)) {
+    Object.entries(updateInfo).forEach(([key, value]) => {
       data[key] = escape(value);
-    }
+    });
 
     const user = await User.findByIdAndUpdate(id, data, {
       new: true,
@@ -189,10 +181,6 @@ export const updateUserAvatar = async (
   try {
     const { avatar } = req.body;
     const id = req.user?.id;
-
-    if (!avatar) {
-      throw new ClientError(INCORRECT_DATA_TEXT);
-    }
 
     const user = await User.findByIdAndUpdate(id, {
       avatar: escape(avatar),
