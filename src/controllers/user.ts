@@ -4,12 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongoose';
 
-import {
-  AuthError,
-  ClientError,
-  ConflictError,
-  NotFoundError,
-} from '../errors';
+import { AuthError, ConflictError, NotFoundError } from '../errors';
 import getPrivateKey from '../helpers/getPrivateKey';
 import { User, type IUser } from '../models';
 
@@ -17,7 +12,7 @@ export interface IUserId {
   id: ObjectId;
 }
 
-type TUpdateUserData = Partial<Pick<IUser, 'name' | 'about' | 'avatar' | 'email'>>;
+type TUpdateUserData = Partial<Pick<IUser, 'name' | 'about'>>;
 
 const NOT_FOUND_TEXT = 'Запрашиваемый пользователь не найден';
 const INCORRECT_DATA_TEXT = 'Некорректные данные';
@@ -145,10 +140,6 @@ export const updateUser = async (
   try {
     const updateInfo = req.body;
     const id = req.user?.id;
-
-    if (Object.keys(updateInfo).length === 0) {
-      throw new ClientError(INCORRECT_DATA_TEXT);
-    }
 
     const data: Record<string, string> = {};
 
