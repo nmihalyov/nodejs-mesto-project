@@ -12,10 +12,59 @@ export interface IUserId {
   id: ObjectId;
 }
 
-type TUpdateUserData = Partial<Pick<IUser, 'name' | 'about'>>;
+type TUpdateUserDataOld = Partial<Pick<IUser, 'name' | 'about'>>;
+type TUpdateUserData = Partial<Pick<IUser, 'name' | 'about' | 'avatar'>>;
 
 const NOT_FOUND_TEXT = 'Запрашиваемый пользователь не найден';
 const INCORRECT_DATA_TEXT = 'Некорректные данные';
+
+const getUserData = async (
+  id: ObjectId | string,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_TEXT);
+    }
+
+    res.send({ status: 'success', user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUserData = async (
+  req: Request<any, any, TUpdateUserData>,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const updateData = req.body;
+    const id = req.user?.id;
+
+    const data: Record<string, string> = {};
+
+    Object.entries(updateData).forEach(([key, value]) => {
+      data[key] = escape(value);
+    });
+
+    const user = await User.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_TEXT);
+    }
+
+    res.send({ status: 'success', user });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const createUser = async (
   req: Request<any, any, IUser>,
@@ -102,64 +151,19 @@ export const getUsers = async (_: Request, res: Response, next: NextFunction) =>
 };
 
 export const getUserProfile = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const id = req.user?.id;
-    const user = await User.findOne({ _id: id });
-
-    if (!user) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
-
-    res.send({ status: 'success', user });
-  } catch (error) {
-    next(error);
-  }
+  getUserData(req.user?.id || '', res, next);
 };
 
 export const getUserById = async (req: Request<IUserId>, res: Response, next: NextFunction) => {
-  try {
-    const { id } = req.params;
-
-    const user = await User.findById(id);
-
-    if (!user) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
-
-    res.send({ status: 'success', user });
-  } catch (error) {
-    next(error);
-  }
+  getUserData(req.params.id, res, next);
 };
 
 export const updateUser = async (
-  req: Request<any, any, TUpdateUserData>,
+  req: Request<any, any, TUpdateUserDataOld>,
   res: Response,
   next: NextFunction,
 ) => {
-  try {
-    const updateInfo = req.body;
-    const id = req.user?.id;
-
-    const data: Record<string, string> = {};
-
-    Object.entries(updateInfo).forEach(([key, value]) => {
-      data[key] = escape(value);
-    });
-
-    const user = await User.findByIdAndUpdate(id, data, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!user) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
-
-    res.send({ status: 'success', user });
-  } catch (error) {
-    next(error);
-  }
+  updateUserData(req, res, next);
 };
 
 export const updateUserAvatar = async (
@@ -167,23 +171,5 @@ export const updateUserAvatar = async (
   res: Response,
   next: NextFunction,
 ) => {
-  try {
-    const { avatar } = req.body;
-    const id = req.user?.id;
-
-    const user = await User.findByIdAndUpdate(id, {
-      avatar: escape(avatar),
-    }, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!user) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
-
-    res.send({ status: 'success', user });
-  } catch (error) {
-    next(error);
-  }
+  updateUserData(req, res, next);
 };
