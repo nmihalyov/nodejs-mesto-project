@@ -1,7 +1,7 @@
 const getPrivateKey = (): string => {
-  const { NODE_ENV, JWT_PRIVATE_KEY } = process.env;
+  const { JWT_PRIVATE_KEY } = process.env;
 
-  if (NODE_ENV === 'production' && JWT_PRIVATE_KEY) {
+  if (JWT_PRIVATE_KEY) {
     return JWT_PRIVATE_KEY;
   }
 
