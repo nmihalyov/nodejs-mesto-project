@@ -77,7 +77,6 @@ export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: 
       },
     }, {
       new: true,
-      runValidators: true,
     });
 
     if (card === null) {
@@ -104,7 +103,6 @@ export const removeLikeFromCard = async (
       },
     }, {
       new: true,
-      runValidators: true,
     });
 
     if (card === null) {
