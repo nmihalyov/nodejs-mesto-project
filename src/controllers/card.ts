@@ -1,5 +1,6 @@
 import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
+import { constants } from 'http2';
 import { ObjectId } from 'mongoose';
 
 import { ForbiddenError, NotFoundError } from '../errors';
@@ -38,7 +39,7 @@ export const createCard = async (
       owner: id,
     });
 
-    res.status(201).send({ status: 'success', card });
+    res.status(constants.HTTP_STATUS_CREATED).send({ status: 'success', card });
   } catch (error) {
     next(error);
   }

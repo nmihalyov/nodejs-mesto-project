@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
+import { constants } from 'http2';
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongoose';
 
@@ -90,7 +91,7 @@ export const createUser = async (
       password: hash,
     });
 
-    res.status(201).send({ status: 'success', user });
+    res.status(constants.HTTP_STATUS_CREATED).send({ status: 'success', user });
   } catch (error) {
     if (error.code === 11000) {
       next(new ConflictError('Пользователь с таким email уже существует'));
