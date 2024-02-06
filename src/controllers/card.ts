@@ -50,11 +50,7 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
     const { cardId } = req.params;
     const id = req.user?.id;
 
-    const card = await Card.findOne({ _id: cardId });
-
-    if (!card) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
+    const card = await Card.findOne({ _id: cardId }).orFail(new NotFoundError(NOT_FOUND_TEXT));
 
     if (card?.owner.toString() !== id) {
       throw new ForbiddenError('Доступ запрещен');
@@ -78,11 +74,7 @@ export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: 
       },
     }, {
       new: true,
-    });
-
-    if (card === null) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
+    }).orFail(new NotFoundError(NOT_FOUND_TEXT));
 
     res.send({ status: 'success', card });
   } catch (error) {
@@ -104,11 +96,7 @@ export const removeLikeFromCard = async (
       },
     }, {
       new: true,
-    });
-
-    if (card === null) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
+    }).orFail(new NotFoundError(NOT_FOUND_TEXT));
 
     res.send({ status: 'success', card });
   } catch (error) {

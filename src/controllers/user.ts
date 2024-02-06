@@ -25,11 +25,7 @@ const getUserData = async (
   next: NextFunction,
 ) => {
   try {
-    const user = await User.findById(id);
-
-    if (!user) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
+    const user = await User.findById(id).orFail(new NotFoundError(NOT_FOUND_TEXT));
 
     res.send({ status: 'success', user });
   } catch (error) {
@@ -55,11 +51,7 @@ const updateUserData = async (
     const user = await User.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
-    });
-
-    if (!user) {
-      throw new NotFoundError(NOT_FOUND_TEXT);
-    }
+    }).orFail(new NotFoundError(NOT_FOUND_TEXT));
 
     res.send({ status: 'success', user });
   } catch (error) {
@@ -110,11 +102,9 @@ export const loginUser = async (
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select('+password');
-
-    if (!user) {
-      throw new AuthError(INCORRECT_DATA_TEXT);
-    }
+    const user = await User.findOne({ email })
+      .orFail(new AuthError(INCORRECT_DATA_TEXT))
+      .select('+password');
 
     const isSuccess = await bcrypt.compare(password, user.password);
 
