@@ -34,6 +34,6 @@ export const updateUserAvatarValidator = celebrate({
 
 export const getUserByIdValidator = celebrate<IUserId>({
   params: Joi.object().keys({
-    id: Joi.string().hex().length(24).required(),
+    id: Joi.string().length(24).required(),
   }),
 });

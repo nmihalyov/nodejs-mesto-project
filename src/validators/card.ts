@@ -12,18 +12,18 @@ export const createCardValidator = celebrate({
 
 export const deleteCardValidator = celebrate<ICardId>({
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
+    cardId: Joi.string().length(24).required(),
   }),
 });
 
 export const addLikeToCardValidator = celebrate<ICardId>({
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
+    cardId: Joi.string().length(24).required(),
   }),
 });
 
 export const removeLikeFromCardValidator = celebrate<ICardId>({
   params: Joi.object().keys({
-    cardId: Joi.string().hex().length(24).required(),
+    cardId: Joi.string().length(24).required(),
   }),
 });

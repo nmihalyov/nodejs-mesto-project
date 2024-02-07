@@ -3,9 +3,14 @@ import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import { constants } from 'http2';
 import jwt from 'jsonwebtoken';
-import { ObjectId } from 'mongoose';
+import { Error, ObjectId } from 'mongoose';
 
-import { AuthError, ConflictError, NotFoundError } from '../errors';
+import {
+  AuthError,
+  ClientError,
+  ConflictError,
+  NotFoundError,
+} from '../errors';
 import getPrivateKey from '../helpers/getPrivateKey';
 import { User, type IUser } from '../models';
 
@@ -17,10 +22,11 @@ type TUpdateUserDataOld = Partial<Pick<IUser, 'name' | 'about'>>;
 type TUpdateUserData = Partial<Pick<IUser, 'name' | 'about' | 'avatar'>>;
 
 const NOT_FOUND_TEXT = 'Запрашиваемый пользователь не найден';
+const INCORRECT_ID_TEXT = 'Некорректный формат ID';
 const INCORRECT_DATA_TEXT = 'Некорректные данные';
 
 const getUserData = async (
-  id: ObjectId | string,
+  id: ObjectId | string | undefined,
   res: Response,
   next: NextFunction,
 ) => {
@@ -29,32 +35,40 @@ const getUserData = async (
 
     res.send({ status: 'success', user });
   } catch (error) {
+    if (error instanceof Error.CastError) {
+      next(new ClientError(INCORRECT_ID_TEXT));
+      return;
+    }
+
     next(error);
   }
 };
 
 const updateUserData = async (
-  req: Request<any, any, TUpdateUserData>,
+  id: ObjectId | string | undefined,
+  data: TUpdateUserData,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const updateData = req.body;
-    const id = req.user?.id;
+    const escapedData: Record<string, string> = {};
 
-    const data: Record<string, string> = {};
-
-    Object.entries(updateData).forEach(([key, value]) => {
-      data[key] = escape(value);
+    Object.entries(data).forEach(([key, value]) => {
+      escapedData[key] = escape(value);
     });
 
-    const user = await User.findByIdAndUpdate(id, data, {
+    const user = await User.findByIdAndUpdate(id, escapedData, {
       new: true,
       runValidators: true,
     }).orFail(new NotFoundError(NOT_FOUND_TEXT));
 
     res.send({ status: 'success', user });
   } catch (error) {
+    if (error instanceof Error.ValidationError) {
+      next(new ClientError(error.message));
+      return;
+    }
+
     next(error);
   }
 };
@@ -85,8 +99,13 @@ export const createUser = async (
 
     res.status(constants.HTTP_STATUS_CREATED).send({ status: 'success', user });
   } catch (error) {
+    if (error instanceof Error.ValidationError) {
+      next(new ClientError(error.message));
+      return;
+    }
+
     if (error.code === 11000) {
-      next(new ConflictError('Пользователь с таким email уже существует'));
+      next(new ConflictError('Пользователь с таким E-mail уже существует'));
       return;
     }
 
@@ -154,7 +173,7 @@ export const updateUser = async (
   res: Response,
   next: NextFunction,
 ) => {
-  updateUserData(req, res, next);
+  updateUserData(req.user?.id, req.body, res, next);
 };
 
 export const updateUserAvatar = async (
@@ -162,5 +181,5 @@ export const updateUserAvatar = async (
   res: Response,
   next: NextFunction,
 ) => {
-  updateUserData(req, res, next);
+  updateUserData(req.user?.id, req.body, res, next);
 };

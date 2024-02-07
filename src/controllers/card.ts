@@ -1,9 +1,9 @@
 import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import { constants } from 'http2';
-import { ObjectId } from 'mongoose';
+import { Error, ObjectId } from 'mongoose';
 
-import { ForbiddenError, NotFoundError } from '../errors';
+import { ClientError, ForbiddenError, NotFoundError } from '../errors';
 import { Card, type ICard } from '../models';
 
 type TCreateCard = Pick<ICard, 'name' | 'link'>;
@@ -13,6 +13,7 @@ export interface ICardId {
 }
 
 const NOT_FOUND_TEXT = 'Запрашиваемая карточка не найдена';
+const INCORRECT_ID_TEXT = 'Некорректный формат ID';
 
 export const getCards = async (_: Request, res: Response, next: NextFunction) => {
   try {
@@ -41,6 +42,11 @@ export const createCard = async (
 
     res.status(constants.HTTP_STATUS_CREATED).send({ status: 'success', card });
   } catch (error) {
+    if (error instanceof Error.ValidationError) {
+      next(new ClientError(error.message));
+      return;
+    }
+
     next(error);
   }
 };
@@ -60,6 +66,11 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
 
     res.send({ status: 'success', card });
   } catch (error) {
+    if (error instanceof Error.CastError) {
+      next(new ClientError(INCORRECT_ID_TEXT));
+      return;
+    }
+
     next(error);
   }
 };
@@ -78,6 +89,11 @@ export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: 
 
     res.send({ status: 'success', card });
   } catch (error) {
+    if (error instanceof Error.CastError) {
+      next(new ClientError(INCORRECT_ID_TEXT));
+      return;
+    }
+
     next(error);
   }
 };
@@ -100,6 +116,11 @@ export const removeLikeFromCard = async (
 
     res.send({ status: 'success', card });
   } catch (error) {
+    if (error instanceof Error.CastError) {
+      next(new ClientError(INCORRECT_ID_TEXT));
+      return;
+    }
+
     next(error);
   }
 };
