@@ -61,11 +61,11 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
 
     const card = await Card.findOne({ _id: cardId }).orFail(new NotFoundError(NOT_FOUND_TEXT));
 
-    if (card?.owner.toString() !== id) {
+    if (card.owner.toString() !== id) {
       throw new ForbiddenError('Доступ запрещен');
     }
 
-    await card?.deleteOne();
+    await card.deleteOne();
 
     res.send({ status: 'success', card });
   } catch (error) {
