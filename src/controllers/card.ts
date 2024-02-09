@@ -1,9 +1,9 @@
-import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import { constants } from 'http2';
 import { Error, ObjectId } from 'mongoose';
 
 import { ClientError, ForbiddenError, NotFoundError } from '../errors';
+import { escapeChars } from '../helpers';
 import { Card, type ICard } from '../models';
 
 type TCreateCard = Pick<ICard, 'name' | 'link'>;
@@ -33,10 +33,13 @@ export const createCard = async (
   try {
     const id = req.user?.id;
     const { name, link } = req.body;
+    const escapedData = escapeChars({
+      name,
+      link,
+    });
 
     const card = await Card.create({
-      name: escape(name),
-      link: escape(link),
+      ...escapedData,
       owner: id,
     });
 

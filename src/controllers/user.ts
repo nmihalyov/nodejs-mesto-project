@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import escape from 'escape-html';
 import { NextFunction, Request, Response } from 'express';
 import { constants } from 'http2';
 import jwt from 'jsonwebtoken';
@@ -11,7 +10,7 @@ import {
   ConflictError,
   NotFoundError,
 } from '../errors';
-import getPrivateKey from '../helpers/getPrivateKey';
+import { escapeChars, getPrivateKey } from '../helpers';
 import { User, type IUser } from '../models';
 
 export interface IUserId {
@@ -51,11 +50,7 @@ const updateUserData = async (
   next: NextFunction,
 ) => {
   try {
-    const escapedData: Record<string, string> = {};
-
-    Object.entries(data).forEach(([key, value]) => {
-      escapedData[key] = escape(value);
-    });
+    const escapedData = escapeChars(data);
 
     const user = await User.findByIdAndUpdate(id, escapedData, {
       new: true,
@@ -88,12 +83,15 @@ export const createUser = async (
     } = req.body;
 
     const hash = await bcrypt.hash(password, 10);
+    const escapedData = escapeChars({
+      name,
+      about,
+      avatar,
+      email,
+    });
 
     const user = await User.create({
-      name: escape(name),
-      about: escape(about),
-      avatar: escape(avatar),
-      email: escape(email),
+      ...escapedData,
       password: hash,
     });
 

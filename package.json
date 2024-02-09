@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=dev ts-node-dev src/app.ts",
+    "dev": "NODE_ENV=dev ts-node-dev --debug --inspect -- src/app.ts",
     "start": "NODE_ENV=prod ts-node dist/app.js",
     "build": "tsc",
     "lint": "npx eslint src/**/*.ts"
