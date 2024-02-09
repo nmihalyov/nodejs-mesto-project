@@ -6,7 +6,7 @@ export const signUpValidator = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     about: Joi.string().min(2).max(30).required(),
-    avatar: Joi.string().required(),
+    avatar: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
     email: Joi.string().required(),
     password: Joi.string().alphanum().min(8).required(),
   }),
@@ -28,12 +28,12 @@ export const updateUserValidator = celebrate({
 
 export const updateUserAvatarValidator = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required(),
+    avatar: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
   }),
 });
 
 export const getUserByIdValidator = celebrate<IUserId>({
   params: Joi.object().keys({
-    id: Joi.string().length(24).required(),
+    id: Joi.string().hex().length(24).required(),
   }),
 });
