@@ -8,12 +8,40 @@ import { Card, type ICard } from '../models';
 
 type TCreateCard = Pick<ICard, 'name' | 'link'>;
 
+type TAction = '$pull' | '$addToSet';
+
+type TUpdateCardData = Partial<Record<TAction, {
+  likes?: string | ObjectId;
+}>>;
+
 export interface ICardId {
   cardId: ObjectId;
 }
 
 const NOT_FOUND_TEXT = 'Запрашиваемая карточка не найдена';
 const INCORRECT_ID_TEXT = 'Некорректный формат ID';
+
+const updateCard = async (
+  id: ObjectId,
+  data: TUpdateCardData,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const card = await Card.findByIdAndUpdate(id, data, {
+      new: true,
+    }).orFail(new NotFoundError(NOT_FOUND_TEXT));
+
+    res.send({ status: 'success', card });
+  } catch (error) {
+    if (error instanceof Error.CastError) {
+      next(new ClientError(INCORRECT_ID_TEXT));
+      return;
+    }
+
+    next(error);
+  }
+};
 
 export const getCards = async (_: Request, res: Response, next: NextFunction) => {
   try {
@@ -79,26 +107,14 @@ export const deleteCard = async (req: Request<ICardId>, res: Response, next: Nex
 };
 
 export const addLikeToCard = async (req: Request<ICardId>, res: Response, next: NextFunction) => {
-  try {
-    const { cardId } = req.params;
+  const userId = req.user?.id;
+  const data: TUpdateCardData = {
+    $addToSet: {
+      likes: userId,
+    },
+  };
 
-    const card = await Card.findByIdAndUpdate(cardId, {
-      $addToSet: {
-        likes: cardId,
-      },
-    }, {
-      new: true,
-    }).orFail(new NotFoundError(NOT_FOUND_TEXT));
-
-    res.send({ status: 'success', card });
-  } catch (error) {
-    if (error instanceof Error.CastError) {
-      next(new ClientError(INCORRECT_ID_TEXT));
-      return;
-    }
-
-    next(error);
-  }
+  updateCard(req.params.cardId, data, res, next);
 };
 
 export const removeLikeFromCard = async (
@@ -106,24 +122,12 @@ export const removeLikeFromCard = async (
   res: Response,
   next: NextFunction,
 ) => {
-  try {
-    const { cardId } = req.params;
+  const userId = req.user?.id;
+  const data: TUpdateCardData = {
+    $pull: {
+      likes: userId,
+    },
+  };
 
-    const card = await Card.findByIdAndUpdate(cardId, {
-      $pull: {
-        likes: cardId,
-      },
-    }, {
-      new: true,
-    }).orFail(new NotFoundError(NOT_FOUND_TEXT));
-
-    res.send({ status: 'success', card });
-  } catch (error) {
-    if (error instanceof Error.CastError) {
-      next(new ClientError(INCORRECT_ID_TEXT));
-      return;
-    }
-
-    next(error);
-  }
+  updateCard(req.params.cardId, data, res, next);
 };
