@@ -1,12 +1,13 @@
 import { celebrate, Joi } from 'celebrate';
 
 import { type ICardId } from '../controllers';
+import { isURL } from '../helpers';
 
 export const createCardValidator = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30)
       .required(),
-    link: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
+    link: Joi.string().custom(isURL).required(),
   }),
 });
 
