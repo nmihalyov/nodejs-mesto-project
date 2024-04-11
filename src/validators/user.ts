@@ -5,9 +5,9 @@ import { isURL } from '../helpers';
 
 export const signUpValidator = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).required(),
-    about: Joi.string().min(2).max(30).required(),
-    avatar: Joi.string().custom(isURL).required(),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().custom(isURL).allow(null, ''),
     email: Joi.string().required(),
     password: Joi.string().alphanum().min(8).required(),
   }),
