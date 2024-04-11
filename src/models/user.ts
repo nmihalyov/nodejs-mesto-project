@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { isEmail, isURL } from 'validator';
+import { isEmail } from 'validator';
 
 export interface IUser {
   name: string;
@@ -14,23 +14,19 @@ export interface IUser {
 const userSchema = new mongoose.Schema<IUser>({
   name: {
     type: String,
-    required: true,
+    required: false,
     minLength: 2,
     maxLength: 30,
   },
   about: {
     type: String,
-    required: true,
+    required: false,
     minLength: 2,
     maxLength: 30,
   },
   avatar: {
     type: String,
-    required: true,
-    validate: {
-      validator: (value: string) => isURL(value),
-      message: 'Некорректный формат URL',
-    },
+    required: false,
   },
   email: {
     type: String,

@@ -7,7 +7,7 @@ export const signUpValidator = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().custom(isURL).allow(null, ''),
+    avatar: Joi.string().allow(null, '').custom(isURL),
     email: Joi.string().required(),
     password: Joi.string().alphanum().min(8).required(),
   }),
