@@ -34,7 +34,7 @@ app.use(rateLimiter);
 
 mongoose.connect(DATABASE_URL);
 
-app.use('/api', rootRouter);
+app.use('/', rootRouter);
 
 app.use(errorLogger);
 app.use(errorMiddleware);
