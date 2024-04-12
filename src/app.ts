@@ -33,15 +33,13 @@ app.use(requestLogger);
 app.use(helmet());
 app.use(rateLimiter);
 
-(async () => {
-  await mongoose.connect(DATABASE_URL);
+mongoose.connect(DATABASE_URL);
 
-  app.use('/', rootRouter);
+app.use('/', rootRouter);
 
-  app.use(errorLogger);
-  app.use(errorMiddleware);
+app.use(errorLogger);
+app.use(errorMiddleware);
 
-  app.listen(Number(SERVER_PORT), () => {
-    console.log(`Server is listening on port ${SERVER_PORT}`);
-  });
-})();
+app.listen(Number(SERVER_PORT), () => {
+  console.log(`Server is listening on port ${SERVER_PORT}`);
+});
