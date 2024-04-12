@@ -16,6 +16,7 @@ import rootRouter from './routes';
 dotenv.config({ path: `.env${process.env.NODE_ENV === 'dev' ? '.dev' : ''}` });
 
 const { SERVER_PORT = 3001, DATABASE_URL = '' } = process.env;
+
 const app = express();
 
 app.use(cors({
@@ -32,13 +33,15 @@ app.use(requestLogger);
 app.use(helmet());
 app.use(rateLimiter);
 
-mongoose.connect(DATABASE_URL);
+(async () => {
+  await mongoose.connect(DATABASE_URL);
 
-app.use('/', rootRouter);
+  app.use('/', rootRouter);
 
-app.use(errorLogger);
-app.use(errorMiddleware);
+  app.use(errorLogger);
+  app.use(errorMiddleware);
 
-app.listen(Number(SERVER_PORT), () => {
-  console.log(`Server is listening on port ${SERVER_PORT}`);
-});
+  app.listen(Number(SERVER_PORT), () => {
+    console.log(`Server is listening on port ${SERVER_PORT}`);
+  });
+})();
