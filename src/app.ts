@@ -33,6 +33,8 @@ app.use(requestLogger);
 app.use(helmet());
 app.use(rateLimiter);
 
+console.log('DATABASE_URL: ', DATABASE_URL);
+
 mongoose.connect(DATABASE_URL);
 
 app.use('/', rootRouter);
