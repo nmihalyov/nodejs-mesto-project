@@ -6,7 +6,7 @@ import { getPrivateKey } from '../helpers';
 
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.cookies.session_token;
+    const token = req.cookies.session_token || req.headers.authorization?.split('Bearer ')[1];
 
     if (!token || typeof token !== 'string') {
       throw new AuthError('Требуется авторизация');

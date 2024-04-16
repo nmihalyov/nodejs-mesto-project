@@ -15,7 +15,7 @@ import rootRouter from './routes';
 
 dotenv.config({ path: `.env${process.env.NODE_ENV === 'dev' ? '.dev' : ''}` });
 
-const { SERVER_PORT = 3001 } = process.env;
+const { SERVER_PORT = 3001, DATABASE_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
 const app = express();
 
@@ -33,7 +33,7 @@ app.use(requestLogger);
 app.use(helmet());
 app.use(rateLimiter);
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect(DATABASE_URL);
 
 app.use('/', rootRouter);
 

@@ -142,7 +142,7 @@ export const loginUser = async (
       sameSite: true,
       maxAge: DAY_IN_MILLISECONDS,
     });
-    res.send({ status: 'success', user });
+    res.send({ status: 'success', user, token });
   } catch (error) {
     next(error);
   }
