@@ -7,7 +7,7 @@ const {
 
 module.exports = {
   apps: [{
-    name: 'mesto-backedn',
+    name: 'mesto-backend',
     script: './dist/app.js',
     env_production: {
       JWT_PRIVATE_KEY, DATABASE_URL, SERVER_PORT,
